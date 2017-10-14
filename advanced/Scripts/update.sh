@@ -16,7 +16,7 @@
 
 readonly ADMIN_INTERFACE_GIT_URL="https://github.com/pi-hole/AdminLTE.git"
 readonly ADMIN_INTERFACE_DIR="/var/www/html/admin"
-readonly PI_HOLE_GIT_URL="https://github.com/pynias/pi-hole.git"
+readonly PI_HOLE_GIT_URL="https://github.com/phynias/pi-hole.git"
 readonly PI_HOLE_FILES_DIR="/etc/.pihole"
 
 # shellcheck disable=SC2034
