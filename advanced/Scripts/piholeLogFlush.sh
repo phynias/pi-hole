@@ -8,8 +8,22 @@
 # This file is copyright under the latest version of the EUPL.
 # Please see LICENSE file for your rights under this license.
 
+colfile="/opt/pihole/COL_TABLE"
+source ${colfile}
+
+# Determine database location
+# Obtain DBFILE=... setting from pihole-FTL.db
+# Constructed to return nothing when
+# a) the setting is not present in the config file, or
+# b) the setting is commented out (e.g. "#DBFILE=...")
+DBFILE="$(sed -n -e 's/^\s^.DBFILE\s*=\s*//p' /etc/pihole/pihole-FTL.conf)"
+# Test for empty string. Use standard path in this case.
+if [ -z "$DBFILE" ]; then
+  DBFILE="/etc/pihole/pihole-FTL.db"
+fi
+
 if [[ "$@" != *"quiet"* ]]; then
-  echo -n "::: Flushing /var/log/pihole.log ..."
+  echo -ne "  ${INFO} Flushing /var/log/pihole.log ..."
 fi
 if [[ "$@" == *"once"* ]]; then
   # Nightly logrotation
@@ -38,8 +52,12 @@ else
       echo " " > /var/log/pihole.log.1
     fi
   fi
+  # Delete most recent 24 hours from FTL's database, leave even older data intact (don't wipe out all history)
+  deleted=$(sqlite3 "${DBFILE}" "DELETE FROM queries WHERE timestamp >= strftime('%s','now')-86400; select changes() from queries limit 1")
+
 fi
 
 if [[ "$@" != *"quiet"* ]]; then
-  echo "... done!"
+  echo -e "${OVER}  ${TICK} Flushed /var/log/pihole.log"
+  echo -e "  ${TICK} Deleted ${deleted} queries from database"
 fi
